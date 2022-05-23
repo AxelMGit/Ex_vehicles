@@ -2,6 +2,8 @@ ESX = nil
 
 disautostart = false
 handbrake = false
+sel = false
+sel2 = false
 
 Citizen.CreateThread(function()
 	while ESX == nil do
@@ -32,7 +34,9 @@ function OpenMenu()
 
             RageUI.Separator("↓ ~o~Actions relatives au véhicule~s~ ↓")
 
-			RageUI.ButtonWithStyle(" Informations Véhicule")
+			RageUI.ButtonWithStyle("• Informations Véhicule ", nil, {RightLabel = "→"},true, function(Hovered, Active, Selected)
+				if Selected then  end
+			end, vehinfos)
 
 			RageUI.ButtonWithStyle("• Actions Véhicule ", nil, {RightLabel = "→"},true, function(Hovered, Active, Selected)
 				if Selected then  end
@@ -55,9 +59,13 @@ function OpenMenu()
 			
 		RageUI.Separator("↓ ~o~Effectuer une Action sur le Véhicule~s~ ↓")
 
-		RageUI.ButtonWithStyle("• Allumer / Éteindre le moteur ", nil, {RightLabel = "→"},true, function(Hovered, Active, Selected)
+		RageUI.Checkbox("Éteindre le moteur",nil, moteur,{},function(Hovered,Active,Selected,Checked)
 			if Selected then
-				if engineon then  
+
+				moteur = Checked
+
+
+				if Checked then
 					print(engineon)
 					SetVehicleEngineOn(veh, false, true, true)
 				else
@@ -67,18 +75,31 @@ function OpenMenu()
 			end
 		end)
 
+		--[[RageUI.ButtonWithStyle("• Allumer / Éteindre le moteur", nil, {RightLabel = "→"},true, function(Hovered, Active, Selected)
+			if Selected then
+				if engineon then  
+					print(engineon)
+					SetVehicleEngineOn(veh, false, true, true)
+				else
+					print(engineon)
+					SetVehicleEngineOn(veh, true, true, true)
+				end
+			end
+		end)]]
+
 		RageUI.ButtonWithStyle("• Serrer / Déserrer le frein à main ", nil, {RightLabel = "→"},true, function(Hovered, Active, Selected)
 			if Selected then  
 				if handbrake then
 					handbrake = false
 					Citizen.Wait(1000)
-					FreezeEntityPosition(veh, false)
-					--SetVehicleHandbrake(veh, true) --> To Test 
+					--FreezeEntityPosition(veh, false)
+					SetVehicleHandbrake(veh, false) --> To Test 
 					RageUI.Popup({message = "Frein à main : ~g~Déserré"})
 				else
-					FreezeEntityPosition(veh, true)
+					--FreezeEntityPosition(veh, true)
 					Citizen.Wait(1000)
 					handbrake = true
+					SetVehicleHandbrake(veh, true)
 					RageUI.Popup({message = "Frein à main : ~r~Serré"})
 				end
 			end
@@ -175,20 +196,110 @@ function OpenMenu()
 			
 		local Ped = GetPlayerPed(-1)
 		veh = GetVehiclePedIsUsing(Ped)
-			
-		RageUI.Separator("↓ ~o~Niveaux~s~ ↓")
-		RageUI.Separator("~o~Niveau d'Essence :~s~ " .. GetVehicleFuelLevel(veh, 0) .. "%")--*100
-		RageUI.Separator("~o~Niveau d'Huile :~s~ " .. GetVehicleOilLevel(veh, 0) .. "L")--*100
+		local turbop = GetVehicleTurboPressure(veh)
+		local turbop2 = math.floor(turbop * turbop + 0.5) / turbop
+		local temp = math.floor(GetVehicleEngineTemperature(veh))
+
+		if sel then 
+			--RageUI.ButtonWithStyle("				     ↓ ~o~Niveaux~s~ ↓ ", nil, {RightLabel = "→"}, true, function(Hovered, Active, Selected)
+			RageUI.ButtonWithStyle("~c~Niveaux~s~", nil, {RightLabel = "↓"}, true, function(Hovered, Active, Selected)
+				if Selected then  
+					if sel then
+						sel = false
+					else
+						sel = true
+					end
+				end
+			end)
+		else
+			---RageUI.ButtonWithStyle("				         - ~o~Niveaux~s~ - ", nil, {},true, function(Hovered, Active, Selected)
+			RageUI.ButtonWithStyle("~t~Niveaux~s~ ", nil, {RightLabel = "→"},true, function(Hovered, Active, Selected)
+				if Selected then  
+					if sel then
+						sel = false
+					else
+						sel = true
+					end
+				end
+			end)
+		end
+
+
+		--[[RageUI.ButtonWithStyle("				↓ ~o~Niveaux~s~ ↓ ", nil, {},true, function(Hovered, Active, Selected)
+			if Selected then  
+				if sel then
+					sel = false
+				else
+					sel = true
+				end
+			end
+		end)]]
+
+
+		if sel then
+		RageUI.ButtonWithStyle("~b~• Niveau d'Usure Véhicule :~s~ " .. math.floor(GetVehicleBodyHealth(veh, 0)/10) .. "%", nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~d~• Niveau d'Usure Moteur :~s~ " .. math.floor(GetVehicleEngineHealth(veh, 0)/10) .. "%", nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~o~• Niveau d'Usure des Pneus :~s~ " .. math.floor(GetVehicleWheelHealth(veh, 0)/10) .. "%", nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~o~• Niveau d'Essence :~s~ " .. GetVehicleFuelLevel(veh, 0) .. "%", nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~o~• Niveau d'Huile :~s~ " .. GetVehicleOilLevel(veh, 0) .. "L", nil, {},true, function()
+			if Selected then  end
+		end)
+
+		end
 			
 		RageUI.Separator("↓ ~o~Performances~s~ ↓")
-		RageUI.Separator("~o~Température Moteur :~s~ " .. GetVehicleEngineTemperature(veh) .. "°")
-		RageUI.Separator("~o~Pression du Turbo :~s~ " .. GetVehicleTurboPressure(veh) .. "Bar")
+
+		if temp < 80 then
+			RageUI.ButtonWithStyle("~o~			Température Moteur :~s~~g~ " .. temp .. "°", nil, {},true, function()
+				if Selected then  end
+			end)
+		elseif temp < 95 then
+			RageUI.ButtonWithStyle("~o~			Température Moteur :~s~~o~ " .. temp .. "°", nil, {},true, function()
+				if Selected then  end
+			end)
+		else
+			RageUI.ButtonWithStyle("~o~			Température Moteur :~s~~r~ " .. temp .. "°", nil, {},true, function()
+				if Selected then  end
+			end)
+		end
+
+
+
+		if turbop > 0 then
+			RageUI.ButtonWithStyle("~o~Pression du Turbo :~s~ " .. turbop2 .. "Bar", nil, {},true, function()
+				if Selected then  end
+			end)
+		end
 
 		RageUI.Separator("↓ ~o~Compression des suspensions~s~ ↓")
-		RageUI.Separator("~o~Avant-Gauche :~s~ " .. (GetVehicleWheelSuspensionCompression(veh, 0))*100)
-		RageUI.Separator("~o~Avant-Droit :~s~ " .. (GetVehicleWheelSuspensionCompression(veh, 1))*100)
-		RageUI.Separator("~o~Arrière-Gauche :~s~ " ..(GetVehicleWheelSuspensionCompression(veh, 2))*100)
-		RageUI.Separator("~o~Arrière-Droit :~s~ " .. (GetVehicleWheelSuspensionCompression(veh, 3))*100)
+
+		RageUI.ButtonWithStyle("~o~			Avant-Gauche :~s~ " .. (GetVehicleWheelSuspensionCompression(veh, 0))*100, nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~o~			Avant-Droit :~s~ " .. (GetVehicleWheelSuspensionCompression(veh, 1))*100, nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~o~			Arrière-Gauche :~s~ " ..(GetVehicleWheelSuspensionCompression(veh, 2))*100, nil, {},true, function()
+			if Selected then  end
+		end)
+
+		RageUI.ButtonWithStyle("~o~			Arrière-Droit :~s~ " .. (GetVehicleWheelSuspensionCompression(veh, 3))*100, nil, {},true, function()
+			if Selected then  end
+		end)
 
 	end, function() 
 	end)
@@ -202,11 +313,12 @@ function OpenMenu()
 			RageUI.Separator("~o~Modèle du Véhicule : Inconnu~s~ " )
 		else
 			RageUI.Separator("~o~Modèle du Véhicule :~s~ " .. GetDisplayNameFromVehicleModel(veh))
-		
+		end
+
 		RageUI.Separator("↓ ~o~Informations Constructeur~s~ ↓")
 		RageUI.Separator("~o~Couleur :~s~ " .. GetVehicleColor(veh))
 		RageUI.Separator("~o~Immatriculation :~s~ " .. GetVehicleNumberPlateText(veh))
-		RageUI.Separator("~o~Vitesse maximale d'origine :~s~ " .. (GetVehicleEstimatedMaxSpeed(veh)*3,6) .. " km/h")
+		RageUI.Separator("~o~Vitesse maximale d'origine :~s~ " .. (GetVehicleEstimatedMaxSpeed(veh)*3.6) .. " km/h")
 		RageUI.Separator("~o~Nombre de sièges :~s~ " .. GetVehicleModelNumberOfSeats(veh) .. " sièges")
 		RageUI.Separator("~o~Nombre de vitesses :~s~ " .. GetVehicleHighGear(veh))
 		RageUI.Separator("~o~Niveau de teinte des vitres :~s~ " .. (GetVehicleWindowTint(veh)*100) .. "%")
