@@ -73,6 +73,7 @@ function OpenMenu()
 					handbrake = false
 					Citizen.Wait(1000)
 					FreezeEntityPosition(veh, false)
+					--SetVehicleHandbrake(veh, true) --> To Test 
 					RageUI.Popup({message = "Frein à main : ~g~Déserré"})
 				else
 					FreezeEntityPosition(veh, true)
@@ -196,6 +197,11 @@ function OpenMenu()
 			
 		local Ped = GetPlayerPed(-1)
 		veh = GetVehiclePedIsUsing(Ped)
+
+		if GetDisplayNameFromVehicleModel(veh) == "CARNOTFOUND" then
+			RageUI.Separator("~o~Modèle du Véhicule : Inconnu~s~ " )
+		else
+			RageUI.Separator("~o~Modèle du Véhicule :~s~ " .. GetDisplayNameFromVehicleModel(veh))
 		
 		RageUI.Separator("↓ ~o~Informations Constructeur~s~ ↓")
 		RageUI.Separator("~o~Couleur :~s~ " .. GetVehicleColor(veh))
