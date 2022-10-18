@@ -1,5 +1,5 @@
 
-FiveM Lua Script to make vehicle behavior more realistic.
+Game | FiveM Lua Script to make vehicle behavior more realistic.
 
 Like :
 - Break the shock absorbers off-road at high speed
